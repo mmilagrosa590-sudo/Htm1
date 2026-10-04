@@ -6,38 +6,42 @@
     <title>Mis XV Años - Valery</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Montserrat', Arial, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', Arial, sans-serif;
         }
 
-        body { 
-            background: radial-gradient(circle, #3b1443 0%, #1a0826 60%, #0a0210 100%); 
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            background: radial-gradient(circle, #3b1443 0%, #1a0826 60%, #0a0210 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 5px;
         }
 
-        .app-container { 
-            width: 100%; 
-            max-width: 400px; 
-            height: 95vh; 
-            background: linear-gradient(180deg, #180525 0%, #0d0214 100%); 
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            align-items: center; 
-            color: #d4af37; 
-            text-align: center; 
-            overflow: hidden; 
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 95vh;
+            background: linear-gradient(180deg, #180525 0%, #0d0214 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            color: #d4af37;
+            text-align: center;
+            overflow: hidden;
             border-radius: 24px;
-            box-shadow: 0 0 25px rgba(157, 78, 221, 0.6), inset 0 0 15px rgba(212, 175, 55, 0.4); 
-            border: 3px solid #d4af37; 
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.6), inset 0 0 15px rgba(212, 175, 55, 0.4);
+            border: 3px solid #d4af37;
             padding: 15px 10px;
         }
 
@@ -96,6 +100,7 @@
             align-items: center;
             pointer-events: none;
             z-index: 2;
+            padding: 0 12px;
         }
 
         .slide.active {
@@ -135,6 +140,7 @@
             filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.9)) drop-shadow(0 0 18px rgba(255, 255, 255, 0.9));
             text-transform: uppercase;
             animation: diamondGlow 2s infinite alternate;
+            line-height: 1.2;
         }
 
         @keyframes diamondGlow {
@@ -150,6 +156,13 @@
             gap: 30px;
             height: 70px;
             z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        .controls-container.thank-you-mode {
+            justify-content: center;
+            gap: 0;
+            height: 70px;
         }
 
         .btn-nav {
@@ -246,7 +259,6 @@
     </style>
 </head>
 <body>
-
     <div class="app-container">
         <div class="header-title">Mis XV Años</div>
 
@@ -283,25 +295,35 @@
             </div>
         </div>
 
-        <div class="controls-container" id="action-area">
-            <button class="btn-nav" id="btnPrev" onclick="prevSlide()" title="Anterior">❮</button>
-            <button class="btn-nav" id="btnNext" onclick="nextSlide()" title="Siguiente">❯</button>
-        </div>
+        <div class="controls-container" id="action-area" aria-live="polite"></div>
     </div>
 
     <script>
-        let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
-        const btnPrev = document.getElementById('btnPrev');
-        const btnNext = document.getElementById('btnNext');
         const pageNumber = document.getElementById('pageNumber');
         const actionArea = document.getElementById('action-area');
+        let currentSlide = 0;
         let isTransitioning = false;
+
+        function renderNavigationButtons() {
+            actionArea.classList.remove('thank-you-mode');
+            actionArea.innerHTML = `
+                <button class="btn-nav" id="btnPrev" type="button" title="Anterior" aria-label="Anterior">❮</button>
+                <button class="btn-nav" id="btnNext" type="button" title="Siguiente" aria-label="Siguiente">❯</button>
+            `;
+
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            btnPrev.addEventListener('click', prevSlide);
+            btnNext.addEventListener('click', nextSlide);
+            updateUI();
+        }
 
         function generateStars() {
             const starsContainer = document.getElementById('starsContainer');
             const starCount = 12;
-            
+
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
@@ -309,74 +331,90 @@
                 const randomY = Math.random() * 100;
                 const randomDelay = Math.random() * 1.5;
                 const randomSize = Math.random() * 4 + 4;
-                
+
                 star.style.left = randomX + '%';
                 star.style.top = randomY + '%';
                 star.style.animationDelay = randomDelay + 's';
                 star.style.width = randomSize + 'px';
                 star.style.height = randomSize + 'px';
-                
+
                 starsContainer.appendChild(star);
+            }
+        }
+
+        function updateUI() {
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            pageNumber.textContent = currentSlide + 1;
+
+            if (btnPrev) {
+                btnPrev.disabled = currentSlide === 0;
+            }
+
+            if (btnNext) {
+                btnNext.disabled = currentSlide === slides.length - 1;
             }
         }
 
         function nextSlide() {
             if (isTransitioning || currentSlide >= slides.length - 1) return;
-            
+
             isTransitioning = true;
             slides[currentSlide].classList.remove('active');
             currentSlide++;
             slides[currentSlide].classList.add('active');
             updateUI();
-            
+
             if (currentSlide === slides.length - 1) {
                 setTimeout(() => {
                     showThankYouMessage();
                 }, 800);
             }
-            
-            setTimeout(() => { isTransitioning = false; }, 800);
+
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 800);
         }
 
         function prevSlide() {
             if (isTransitioning || currentSlide <= 0) return;
-            
+
             isTransitioning = true;
             slides[currentSlide].classList.remove('active');
             currentSlide--;
             slides[currentSlide].classList.add('active');
             updateUI();
-            
+
             if (currentSlide < slides.length - 1) {
                 hideThankYouMessage();
             }
-            
-            setTimeout(() => { isTransitioning = false; }, 800);
-        }
 
-        function updateUI() {
-            pageNumber.textContent = currentSlide + 1;
-            btnPrev.disabled = currentSlide === 0;
-            btnNext.disabled = currentSlide === slides.length - 1;
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 800);
         }
 
         function showThankYouMessage() {
+            actionArea.classList.add('thank-you-mode');
             actionArea.innerHTML = '<div class="thank-you-text">✨ ¡Gracias! ✨</div>';
-            actionArea.style.justifyContent = 'center';
         }
 
         function hideThankYouMessage() {
-            actionArea.innerHTML = `
-                <button class="btn-nav" id="btnPrev" onclick="prevSlide()" title="Anterior">❮</button>
-                <button class="btn-nav" id="btnNext" onclick="nextSlide()" title="Siguiente">❯</button>
-            `;
-            actionArea.style.justifyContent = 'center';
-            actionArea.style.gap = '30px';
-            updateUI();
+            renderNavigationButtons();
         }
 
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            }
+            if (event.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
         generateStars();
-        updateUI();
+        renderNavigationButtons();
     </script>
 </body>
 </html>
